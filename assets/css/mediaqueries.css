@@ -1,0 +1,318 @@
+/* Tablet Devices (768px) */
+@media (max-width: 768px) {
+  /* Navigation User Icon & Dropdown */
+  .user-icon {
+    width: 30px;
+    height: 30px;
+    margin-right: 10rem;
+  }
+
+  /* Typography */
+  .title,
+  .service-item h2 {
+    font-size: 1.25rem;
+  }
+
+  .content-box p,
+  .content-box ul li,
+  .service-item p,
+  .about-text {
+    font-size: 0.95rem;
+  }
+
+  .hero .hero-heading {
+    font-size: 2rem;
+    line-height: 1.5;
+  }
+
+  .btn-custom {
+    margin-bottom: 2rem;
+  }
+
+  /* Layout & Spacing */
+  .about-section,
+  .mission-vision-goal,
+  .services-section {
+    padding-left: 50px;
+    padding-right: 50px;
+    text-align: center;
+  }
+
+  /* Gallery Section */
+  .gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    padding: 0 50px;
+  }
+
+  /* Services Section */
+  .services-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 0 50px;
+  }
+
+  /* Admin Dashboard */
+  .sidebar {
+    position: static;
+    height: auto;
+    padding-top: 0;
+  }
+
+  main {
+    margin-left: 0 !important;
+  }
+
+  .stats-card {
+    margin-bottom: 1rem;
+  }
+
+  /* Forms & Tables */
+  .contact-form-container,
+  .appointment-form,
+  .login-form,
+  .signup-form {
+    width: 90%;
+    padding: 1.5rem;
+  }
+
+  .table-responsive {
+    overflow-x: auto;
+  }
+
+  /* Footer */
+  .footer,
+  .footer-reverse {
+    padding: 30px;
+    text-align: center;
+  }
+
+  .footer-container,
+  .footer-container-reverse {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .footer-logo,
+  .footer-logo-reverse {
+    margin: 0 auto;
+  }
+
+  .footer-links,
+  .footer-links-reverse {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  .footer-subscription,
+  .footer-subscription-reverse {
+    width: 100%;
+    text-align: center;
+  }
+
+  .subscribe-form,
+  .subscribe-form-reverse {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    max-width: 500px;
+    margin: 0 auto;
+    margin-bottom: 2rem;
+  }
+}
+
+/* Mobile Devices (360px - 430px) */
+@media (min-width: 360px) and (max-width: 430px) {
+  /* Typography */
+  .header-title {
+    font-size: 2.5rem;
+    margin: 15px 0;
+  }
+
+  .hero .hero-heading {
+    font-size: 2rem;
+    line-height: 1.3;
+    text-align: center;
+    margin: 0;
+  }
+
+  .section-title {
+    font-size: 1.8rem;
+  }
+
+  /* Navigation */
+  .navbar-nav .nav-link {
+    font-size: 0.9rem;
+    margin: 0 8px;
+    padding: 0.3rem 0.6rem;
+  }
+
+  /* Layout & Spacing */
+  .about-section,
+  .mission-vision-goal,
+  .services-section {
+    padding: 20px;
+    margin-top: 2rem;
+  }
+
+  /* Gallery Section */
+  .gallery-section {
+    padding: 20px;
+    margin: 2rem 0;
+  }
+
+  .gallery-row {
+    flex-direction: column;
+    margin-bottom: 2rem;
+  }
+
+  .gallery-row img {
+    width: 100%;
+    height: auto;
+    margin: 10px 0;
+  }
+
+  /* Services Section */
+  .service-item {
+    padding: 20px;
+    margin-bottom: 2rem;
+  }
+
+  /* Contact & Forms */
+  .contact-container,
+  .appointment-form,
+  .review-container {
+    width: 95%;
+    padding: 1rem;
+    margin: 1rem auto;
+  }
+
+  .form-group-row {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  /* Account Section */
+  .account-container {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .password-header {
+    padding-right: 0;
+  }
+
+  .password-section input {
+    width: 100%;
+  }
+
+  /* Reviews Section */
+  .reviews-section {
+    width: 95%;
+    padding: 1rem;
+  }
+
+  .reviewer-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  /* Admin Dashboard */
+  .stats-card,
+  .chart-container {
+    padding: 1rem;
+  }
+
+  .stats-number {
+    font-size: 1.5rem;
+  }
+
+  /* Login/Signup Forms */
+  .container-fluid {
+    max-width: 95%;
+    margin: 1rem;
+    padding: 1.5rem;
+  }
+
+  /* Write Review */
+  .stars i {
+    font-size: 1.5rem;
+  }
+
+  /* Footer */
+  .footer,
+  .footer-reverse {
+    padding: 20px;
+    margin-top: 3rem;
+  }
+
+  .footer-container,
+  .footer-container-reverse {
+    margin-top: 1rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-logo,
+  .footer-logo-reverse {
+    margin-left: 0;
+    font-size: 1.5rem;
+  }
+
+  .footer-links,
+  .footer-links-reverse {
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+
+  .footer-subscription p,
+  .footer-subscription-reverse p {
+    margin-right: 0;
+  }
+
+  .subscribe-form,
+  .subscribe-form-reverse {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .subscribe-form input,
+  .subscribe-form-reverse input,
+  .subscribe-form button,
+  .subscribe-form-reverse button {
+    width: 100%;
+    border-radius: 20px;
+  }
+
+  /* Tables */
+  .appointments-table th,
+  .appointments-table td {
+    padding: 8px;
+    font-size: 0.8rem;
+  }
+
+  .table-container {
+    padding: 0.5rem;
+  }
+
+  /* Admin Navigation */
+  .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .navbar-toggler {
+    padding: 0.4rem 0.6rem;
+  }
+
+  /* Carousel */
+  .carousel-svg-medium {
+    width: 100%;
+    max-width: 300px;
+  }
+}

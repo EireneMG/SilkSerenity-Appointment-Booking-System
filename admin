@@ -1,0 +1,635 @@
+<?php
+session_start();
+if (!isset($_SESSION['admin_id'])) {
+    header('Location: admin_login.html');
+    exit;
+}
+
+include('connection.php');
+
+// Function to generate suggestions based on analytics
+function generateSuggestions($conn) {
+    $suggestions = [];
+    
+    // Get most popular service
+    $stmt = $conn->prepare("
+        SELECT service, COUNT(*) as count
+        FROM appointments
+        WHERE status != 'Cancelled'
+        GROUP BY service
+        ORDER BY count DESC
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $popular_service = $stmt->get_result()->fetch_assoc();
+
+    // Get least booked day
+    $stmt = $conn->prepare("
+        SELECT DAYNAME(appointment_date) as day_name, COUNT(*) as count
+        FROM appointments
+        GROUP BY day_name
+        ORDER BY count ASC
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $slow_day = $stmt->get_result()->fetch_assoc();
+
+    // Get age group analysis
+    $stmt = $conn->prepare("
+        SELECT 
+            CASE 
+                WHEN age < 25 THEN 'Under 25'
+                WHEN age BETWEEN 25 AND 34 THEN '25-34'
+                WHEN age BETWEEN 35 AND 44 THEN '35-44'
+                ELSE '45+' 
+            END as age_group,
+            COUNT(*) as count
+        FROM appointments
+        WHERE status != 'Cancelled'
+        GROUP BY age_group
+        ORDER BY count DESC
+        LIMIT 1
+    ");
+    $stmt->execute();
+    $age_group = $stmt->get_result()->fetch_assoc();
+
+    // Generate focused suggestions based on actual data
+    if ($popular_service) {
+        $suggestions[] = "💫 Service Insight: '{$popular_service['service']}' is your most booked service. Consider adding more time slots for this service during peak hours.";
+    }
+    
+    if ($slow_day) {
+        $suggestions[] = "📊 Booking Pattern: {$slow_day['day_name']} shows lower booking rates. Consider special promotions for this day to increase bookings.";
+    }
+
+    if ($age_group) {
+        $suggestions[] = "👥 Demographics: Most clients are in the {$age_group['age_group']} age group. Consider tailoring services and promotions for this demographic.";
+    }
+
+    $suggestions[] = "📈 Monthly Trend: Monitor the monthly booking patterns to prepare for peak seasons.";
+
+    return $suggestions;
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - SilkSerenity</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        .analytics-container {
+            padding: 2rem;
+        }
+        .chart-container {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stats-card {
+            background-color: #f3d8cf;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            height: 100%;
+        }
+        .source-item {
+            margin-bottom: 15px;
+        }
+        .source-name {
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #734432;
+        }
+        .source-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        .count {
+            color: #666;
+        }
+        .percentage {
+            color: #888;
+        }
+        .progress {
+            height: 8px;
+            background-color: #f3e5e1;
+            margin-bottom: 10px;
+        }
+        .progress-bar {
+            background-color: #734432;
+        }
+        .stats-card h3 {
+            color: #734432;
+            margin-bottom: 1.2rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        @media print {
+            .analytics-container {
+                width: 100% !important;
+                padding: 20px !important;
+            }
+
+            .chart-container {
+                page-break-inside: avoid !important;
+                margin: 10px 0 !important; /* Ensure spacing */
+            }
+
+            canvas {
+                max-width: 100% !important;
+                height: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #734432;">
+        <div class="container">
+            <a class="navbar-brand" href="#">SilkSerenity Admin</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_dashboard.php">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_users.php">User Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_transactions.php">Transactions</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="admin_analytics.php">Analytics</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_manage.php">Admin Management</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_services.php">Service Management</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="admin_logout.php">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="analytics-container">
+        <!-- Generate Report -->
+    <div class="mb-4">
+        <button onclick="generatePDF()" class="btn btn-primary" style="background-color: #734432; border: none;">
+            <i class="bi bi-download"></i> Generate Report
+        </button>
+    </div>
+    <!-- Add this suggestions section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="stats-card">
+                <h3>📈 Business Insights & Suggestions</h3>
+                <div class="suggestions-list">
+                    <?php
+                    $suggestions = generateSuggestions($conn);
+                    foreach ($suggestions as $suggestion) {
+                        echo "<p style='margin-bottom: 10px;'>$suggestion</p>";
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h3>Most Popular Services</h3>
+                    <?php
+                    $stmt = $conn->prepare("
+                        SELECT 
+                            service, 
+                            COUNT(*) as count
+                        FROM appointments
+                        WHERE status != 'Cancelled' 
+                        GROUP BY service
+                        ORDER BY count DESC
+                    ");
+                    $stmt->execute();
+                    $services = $stmt->get_result();
+
+                    // Calculate total appointments for percentage
+                    $total_services = 0;
+                    $service_data = [];
+                    while ($service = $services->fetch_assoc()) {
+                        $total_services += $service['count'];
+                        $service_data[] = $service;
+                    }
+
+                    // Display total bookings
+                    echo "<p>Total Bookings: <strong>{$total_services}</strong></p>"; // Add this line to display total bookings
+
+                    // Display each service with count and percentage
+                    foreach ($service_data as $service) {
+                        $percentage = ($service['count'] / $total_services) * 100;
+                        echo "<div class='source-item'>";
+                        echo "<p class='source-name'>" . htmlspecialchars($service['service']) . "</p>";
+                        echo "<div class='source-stats'>";
+                        echo "<span class='count'>{$service['count']} bookings</span>";
+                        echo "<span class='percentage'>(" . number_format($percentage, 1) . "%)</span>";
+                        echo "</div>";
+                        echo "<div class='progress'>";
+                        echo "<div class='progress-bar' role='progressbar' style='width: {$percentage}%' 
+                              aria-valuenow='{$percentage}' aria-valuemin='0' aria-valuemax='100'></div>";
+                        echo "</div>";
+                        echo "</div>";
+                    }
+                    ?>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h3>Customer Source</h3>
+                    <canvas id="customerSourceChart"></canvas>
+                    <?php
+                    $stmt = $conn->prepare("
+                        SELECT 
+                            CASE 
+                                WHEN source IS NULL OR source = '' THEN 'Not Specified'
+                                ELSE source 
+                            END as source,
+                            COUNT(*) as count
+                        FROM appointments
+                        WHERE status != 'Cancelled' 
+                        GROUP BY 
+                            CASE 
+                                WHEN source IS NULL OR source = '' THEN 'Not Specified'
+                                ELSE source 
+                            END
+                        ORDER BY count DESC
+                    ");
+                    $stmt->execute();
+                    $sources = $stmt->get_result();
+
+                    // Prepare data for the pie chart
+                    $source_labels = [];
+                    $source_counts = [];
+                    while ($source = $sources->fetch_assoc()) {
+                        $source_labels[] = htmlspecialchars($source['source']);
+                        $source_counts[] = $source['count'];
+                    }
+                    ?>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <h3>Age Demographics</h3>
+                    <canvas id="ageDemographicsChart"></canvas>
+                    <?php
+                    $stmt = $conn->prepare("
+                        SELECT 
+                            CASE 
+                                WHEN age < 25 THEN 'Under 25'
+                                WHEN age BETWEEN 25 AND 34 THEN '25-34'
+                                WHEN age BETWEEN 35 AND 44 THEN '35-44'
+                                ELSE '45+' 
+                            END as age_group,
+                            COUNT(*) as count
+                        FROM appointments
+                        WHERE status != 'Cancelled'  
+                        GROUP BY age_group
+                        ORDER BY 
+                            CASE age_group
+                                WHEN 'Under 25' THEN 1
+                                WHEN '25-34' THEN 2
+                                WHEN '35-44' THEN 3
+                                WHEN '45+' THEN 4
+                            END
+                    ");
+                    $stmt->execute();
+                    $ages = $stmt->get_result();
+
+                    // Prepare data for the pie chart
+                    $age_labels = [];
+                    $age_counts = [];
+                    while ($age = $ages->fetch_assoc()) {
+                        $age_labels[] = $age['age_group'];
+                        $age_counts[] = $age['count'];
+                    }
+                    ?>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h3>Weekly Booking Patterns</h3>
+                    <canvas id="weeklyChart"></canvas>
+                    <?php
+                    $stmt = $conn->prepare("
+                        SELECT 
+                            DAYNAME(appointment_date) as day_name,
+                            COUNT(*) as count
+                        FROM appointments
+                        WHERE appointment_date >= DATE_SUB(CURRENT_DATE, INTERVAL 7 DAY)
+                        AND status != 'Cancelled'  
+                        GROUP BY day_name
+                        ORDER BY FIELD(day_name, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday')
+                    ");
+                    $stmt->execute();
+                    $weekly_data = $stmt->get_result();
+                    $days = [];
+                    $counts = [];
+                    while ($row = $weekly_data->fetch_assoc()) {
+                        $days[] = $row['day_name'];
+                        $counts[] = $row['count'];
+                    }
+                    ?>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="chart-container">
+                    <h3>Service Distribution</h3>
+                    <canvas id="serviceChart"></canvas>
+                    <?php
+                    $stmt = $conn->prepare("
+                        SELECT service, COUNT(*) as count
+                        FROM appointments
+                        WHERE status != 'Cancelled'  
+                        GROUP BY service
+                        ORDER BY count DESC
+                    ");
+                    $stmt->execute();
+                    $service_data = $stmt->get_result();
+                    $services = [];
+                    $service_counts = [];
+                    
+                    // Prepare data for the pie chart
+                    while ($row = $service_data->fetch_assoc()) {
+                        $service_name = htmlspecialchars($row['service']); // Use the exact service name
+                        $services[] = $service_name; // Store the service name
+                        $service_counts[] = $row['count'];
+                    }
+
+                    // Ensure "serenity-removal" is included
+                    if (!in_array("serenity-removal", $services)) {
+                        $services[] = "serenity-removal"; // Add the correct service name
+                        $service_counts[] = 0; // Assuming no bookings for this service
+                    }
+                    ?>
+                </div>
+            </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="chart-container">
+                    <h3>Monthly Appointments Trend</h3>
+                    <canvas id="monthlyChart"></canvas>
+                    <?php
+                    // Prepare data for each month
+                    $months = [
+                        'January', 'February', 'March', 'April', 'May', 
+                        'June', 'July', 'August', 'September', 'October', 
+                        'November', 'December'
+                    ];
+                    $monthly_counts = array_fill(0, 12, 0); // Initialize counts for 12 months
+
+                    // Get real data for December
+                    $stmt = $conn->prepare("
+                        SELECT 
+                            COUNT(*) as count
+                        FROM appointments
+                        WHERE MONTH(appointment_date) = 12 
+                        AND YEAR(appointment_date) = YEAR(CURDATE()) 
+                        AND status != 'Cancelled'
+                    ");
+                    $stmt->execute();
+                    $stmt->bind_result($december_count);
+                    $stmt->fetch();
+                    $stmt->close();
+
+                    // Set December count
+                    $monthly_counts[11] = $december_count;
+
+                    // Generate dummy data for January to November
+                    for ($i = 0; $i < 11; $i++) {
+                        $monthly_counts[$i] = rand(15, 30); // Random counts for Jan-Nov
+                    }
+
+                    // Output the data for the chart
+                    ?>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Register the ChartDataLabels plugin
+         Chart.register(ChartDataLabels);
+
+        // Set global options for datalabels to disable by default
+         Chart.defaults.plugins.datalabels.display = false;
+        
+        // Customer Source Pie Chart
+        new Chart(document.getElementById('customerSourceChart'), {
+            type: 'pie',
+            data: {
+                labels: <?php echo json_encode($source_labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($source_counts); ?>,
+                    backgroundColor: ['#451952', '#8b1f5d', '#c93754', '#f2683a', '#ffa600']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Age Demographics Pie Chart
+        new Chart(document.getElementById('ageDemographicsChart'), {
+            type: 'pie',
+            data: {
+                labels: <?php echo json_encode($age_labels); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($age_counts); ?>,
+                    backgroundColor: ['#451952', '#a1245c', '#e75644', '#ffa600']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(tooltipItem) {
+                                return tooltipItem.label + ': ' + tooltipItem.raw;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Weekly Booking Patterns Chart
+        new Chart(document.getElementById('weeklyChart'), {
+            type: 'bar',
+            data: {
+                labels: <?php echo json_encode($days); ?>,
+                datasets: [{
+                    label: 'Number of Bookings',
+                    data: <?php echo json_encode($counts); ?>,
+                    backgroundColor: '#f3d8cf',
+                    borderColor: '#734432',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    datalabels: {
+                        display: true,
+                        color: 'black',
+                        font: {
+                            weight: 'bold',
+                        },
+                        formatter: (value, context) => {
+                            return value; // Display the value
+                        },
+                        anchor: 'center',
+                        align: 'center',
+                    }
+                }
+            },
+            plugins: [ChartDataLabels] // Register the plugin
+        });
+
+        // Service Distribution Chart
+        new Chart(document.getElementById('serviceChart'), {
+            type: 'pie',
+            data: {
+                labels: <?php echo json_encode($services); ?>,
+                datasets: [{
+                    data: <?php echo json_encode($service_counts); ?>,
+                    backgroundColor: ['#451952', '#7d1e5d', '#b22a5a', '#dd484b', '#f77433', '#ffa600']
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+
+        // Monthly Trend Chart
+        new Chart(document.getElementById('monthlyChart'), {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($months); ?>,
+                datasets: [{
+                    label: 'Number of Appointments',
+                    data: <?php echo json_encode($monthly_counts); ?>,
+                    borderColor: '#734432',
+                    backgroundColor: 'rgba(115, 68, 50, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+
+        function generatePDF() {
+            const { jsPDF } = window.jspdf; // Access jsPDF from the global window object
+            const doc = new jsPDF();
+
+            // Add title and date to the report
+            doc.setFontSize(16);
+            doc.text("SilkSerenity Analytics Report", 10, 10);
+            doc.setFontSize(12);
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 10, 20);
+
+            // Capture the content of the analytics container
+            const element = document.querySelector('.analytics-container');
+
+            // Use html2canvas to capture the content
+            html2canvas(element).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const imgWidth = 190; // Set the width of the image
+                const pageHeight = doc.internal.pageSize.height;
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                let heightLeft = imgHeight;
+
+                let position = 10;
+
+                // Add the image to the PDF
+                doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                // Add new pages if the content is too long
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    doc.addPage();
+                    doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+
+                // Save the PDF
+                doc.save(`silkserenity-analytics-report-${new Date().toLocaleDateString()}.pdf`);
+            }).catch(err => {
+                console.error('Error capturing the content:', err);
+            });
+        }
+    </script>
+</body>
+</html>

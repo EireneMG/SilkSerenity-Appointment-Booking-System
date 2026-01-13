@@ -1,0 +1,125 @@
+/* Admin Layout */
+.sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    padding: 48px 0 0;
+    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+    background-color: #f8f9fa;
+}
+
+.sidebar-sticky {
+    position: relative;
+    top: 0;
+    height: calc(100vh - 48px);
+    padding-top: .5rem;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Dashboard Cards */
+.card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: none;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card h5 {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.card h2 {
+    color: #2c3e50;
+    margin-bottom: 0;
+}
+
+/* Tables */
+.table {
+    background-color: white;
+    border-radius: 0.25rem;
+}
+
+.table th {
+    border-top: none;
+    background-color: #f8f9fa;
+    font-weight: 500;
+}
+
+/* Buttons */
+.btn-primary {
+    background-color: #734432;
+    border-color: #734432;
+}
+
+.btn-primary:hover {
+    background-color: #5a352a;
+    border-color: #5a352a;
+}
+
+/* Stats Cards */
+.stats-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.stats-card h3 {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+}
+
+.stats-number {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Charts */
+.chart-container {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Admin Login */
+.admin-login {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    background-color: #f5f5f5;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    margin: auto;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .sidebar {
+        position: static;
+        height: auto;
+        padding-top: 0;
+    }
+    
+    main {
+        margin-left: 0 !important;
+    }
+}
