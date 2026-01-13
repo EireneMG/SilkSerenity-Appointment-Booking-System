@@ -6,7 +6,6 @@ A comprehensive salon booking and management system designed for eyelash service
 
 - [Introduction](#introduction)
 - [Key Features](#key-features)
-- [Project Structure](#project-structure)
 - [Installation Guide](#installation-guide)
 - [Usage](#usage)
 - [Database Structure](#database-structure)
@@ -42,64 +41,6 @@ The application handles the complete customer journey from registration and serv
 - **Analytics & Reports**: Generate sales reports (daily, weekly, monthly, yearly) with CSV export
 - **Email Notifications**: Automatic email notifications for new appointments
 
-## Project Structure
-
-```
-SilkSerenity/
-├── svg/                    # SVG images and icons
-├── vendor/                 # Composer dependencies (PHPMailer)
-│
-├── home.html               # Homepage
-├── login.html              # User login page
-├── signup.html             # User registration page
-├── account.html            # User account management
-├── gallery.html            # Service gallery
-│
-├── services.php            # Services listing page
-├── appointments.php        # Appointment booking page
-├── reviews.php             # Reviews display page
-├── contact.php             # Contact form page
-│
-├── admin_login.html        # Admin login page
-├── admin_dashboard.php     # Admin dashboard
-├── admin_users.php         # User management
-├── admin_services.php      # Service management
-├── admin_transactions.php  # Transaction management
-├── admin_analytics.php     # Analytics and reports
-├── admin_manage.php        # General admin management
-│
-├── connection.php          # Database connection configuration
-├── authentication.php      # User authentication handler
-├── admin_auth.php          # Admin authentication handler
-├── register.php            # User registration handler
-├── book_appointment.php    # Appointment booking handler
-├── submit_review.php       # Review submission handler
-├── update_status.php       # Appointment status update handler
-├── email_utils.php         # Email notification utilities
-│
-├── get_userdata.php        # Fetch user data API
-├── get_account_data.php    # Fetch account data API
-├── get_appointments.php    # Fetch appointments API
-├── get_user_appointments.php # Fetch user-specific appointments
-├── get_admin_appointments.php # Fetch admin appointments
-├── get_booked_slots.php    # Fetch booked time slots
-├── get_dashboard_data.php  # Fetch dashboard statistics
-│
-├── script.js               # Main frontend JavaScript
-├── appointments.js         # Appointment booking JavaScript
-├── admin_login.js          # Admin login JavaScript
-├── admin_dashboard.js      # Admin dashboard JavaScript
-│
-├── styles.css              # Main stylesheet
-├── admin_styles.css        # Admin panel stylesheet
-├── mediaqueries.css        # Responsive design styles
-│
-├── composer.json           # PHP dependencies
-├── composer.lock           # Locked dependency versions
-│
-└── README.md               # This file
-```
-
 ## Installation Guide
 
 ### Prerequisites
@@ -125,75 +66,6 @@ SilkSerenity/
    ```
 
 3. **Create Database Tables**
-   
-   Create the following tables in your `users_db` database:
-
-   ```sql
-   -- Users table
-   CREATE TABLE userdata (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       username VARCHAR(255) NOT NULL,
-       email VARCHAR(255) NOT NULL UNIQUE,
-       password VARCHAR(255) NOT NULL
-   );
-
-   -- Services table
-   CREATE TABLE services (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       service_name VARCHAR(255) NOT NULL,
-       price DECIMAL(10,2) NOT NULL,
-       description TEXT
-   );
-
-   -- Appointments table
-   CREATE TABLE appointments (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       user_id INT NOT NULL,
-       first_name VARCHAR(255) NOT NULL,
-       last_name VARCHAR(255) NOT NULL,
-       email VARCHAR(255) NOT NULL,
-       phone VARCHAR(20),
-       address TEXT,
-       age INT,
-       service VARCHAR(255) NOT NULL,
-       source VARCHAR(255),
-       appointment_date DATE NOT NULL,
-       appointment_time TIME NOT NULL,
-       status ENUM('Pending', 'Confirmed', 'Completed', 'Cancelled') DEFAULT 'Pending',
-       FOREIGN KEY (user_id) REFERENCES userdata(id) ON DELETE CASCADE
-   );
-
-   -- Transactions table
-   CREATE TABLE transactions (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       appointment_id INT NOT NULL,
-       amount DECIMAL(10,2) NOT NULL,
-       payment_method VARCHAR(50),
-       payment_status ENUM('Pending', 'Paid', 'Refunded') DEFAULT 'Pending',
-       transaction_date DATE,
-       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
-   );
-
-   -- Reviews table
-   CREATE TABLE reviews (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       user_id INT NOT NULL,
-       appointment_id INT NOT NULL,
-       rating INT NOT NULL CHECK (rating >= 1 AND rating <= 5),
-       review_text TEXT,
-       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-       FOREIGN KEY (user_id) REFERENCES userdata(id) ON DELETE CASCADE,
-       FOREIGN KEY (appointment_id) REFERENCES appointments(id) ON DELETE CASCADE
-   );
-
-   -- Admin table
-   CREATE TABLE admin (
-       id INT AUTO_INCREMENT PRIMARY KEY,
-       username VARCHAR(255) NOT NULL UNIQUE,
-       password VARCHAR(255) NOT NULL
-   );
-   ```
 
 4. **Configure Database Connection**
    
@@ -380,12 +252,12 @@ Contributions are welcome! To contribute to this project:
 - Test all features before submitting
 
 ## Support & Contact
-
-For support, questions, or inquiries about SilkSerenity:
-
-- **Project Repository**: [GitHub Repository URL]
-- **Issues**: Report bugs or request features through the issue tracker
-- **Email**: [Contact Email]
+- **Project Team (4 members - Full Stack Developers):**
+  - Eirene Gratuito - eirenegratuito@gmail.com
+  - Claudine Moneek Mejorada - mejoradac45@gmail.com
+  - Princes Angelie Subido - princesubido8@gmail.com
+  - Andrea Laganas - andrea.laganas@gmail.com
+- **Issue Reporting:** Please open an issue on our repository for bugs or feature requests with steps to reproduce and screenshots.
 
 ---
 
