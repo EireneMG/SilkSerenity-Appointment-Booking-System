@@ -14,13 +14,13 @@ class EmailUtils {
             $mail->isSMTP();
             $mail->Host = 'smtp.gmail.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'silkserenity1@gmail.com'; // Replace with your Gmail
-            $mail->Password = 'enrp eqjg wtpj qsql'; // Replace with your Gmail App Password
+            $mail->Username = 'silkserenity@gmail.com'; // Replace with your Gmail
+            $mail->Password = 'Password'; // Replace with your Gmail App Password
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port = 587;
             
             // Default sender
-            $mail->setFrom('silkserenity1@gmail.com', 'SilkSerenity');
+            $mail->setFrom('silkserenity@gmail.com', 'SilkSerenity');
             
             return $mail;
         } catch (Exception $e) {
@@ -34,7 +34,7 @@ class EmailUtils {
         if (!$mail) return false;
 
         try {
-            $mail->addAddress('silkserenity1@gmail.com'); // Admin email
+            $mail->addAddress('silkserenity@gmail.com'); // Admin email
             $mail->isHTML(true);
             $mail->Subject = 'New Appointment Booking';
             
